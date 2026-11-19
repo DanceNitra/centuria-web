@@ -38,6 +38,23 @@
     background: linear-gradient(180deg, var(--gold-hi), var(--gold) 55%, #a8741f);
     -webkit-background-clip: text; background-clip: text; color: transparent;
   }
+  .tally { position: fixed; right: 20px; bottom: 20px; z-index: 5; display: flex; align-items: center; gap: 12px;
+           padding: 10px 14px 10px 12px; border: 1px solid rgba(217, 164, 65, .28); border-radius: 4px;
+           background: rgba(0, 0, 0, .62); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
+           opacity: 0; transform: translateY(6px); transition: opacity 1s ease, transform 1s ease; }
+  .tally.on { opacity: 1; transform: none; }
+  .tally svg { display: block; width: 46px; height: 46px; }
+  .tally rect { fill: rgba(217, 164, 65, .2); }
+  .tally rect.f { fill: var(--gold); }
+  .tally rect.new { fill: var(--gold-hi); animation: pulse 1.6s ease-in-out 3; }
+  @keyframes pulse { 50% { fill: #fff6dc; } }
+  .tally .t { display: flex; flex-direction: column; gap: 4px; line-height: 1; }
+  .tally .lab { font-size: 9px; letter-spacing: .38em; color: rgba(217, 164, 65, .7); }
+  .tally .num { font-weight: 600; font-size: 20px; letter-spacing: .08em; color: var(--gold-hi); }
+  .tally .num small { font-size: 12px; color: rgba(217, 164, 65, .6); letter-spacing: .12em; }
+  @media (max-width: 700px) { .tally { right: 12px; bottom: 12px; padding: 8px 10px; gap: 9px; }
+    .tally svg { width: 36px; height: 36px; } .tally .num { font-size: 16px; } }
+  @media (prefers-reduced-motion: reduce) { .tally, .tally rect.new { transition: none; animation: none; } }
   @media (prefers-reduced-motion: reduce) { .stage img { transition: none; } }
 </style>
 </head>
@@ -56,6 +73,10 @@
     <p class="soon">COMING SOON</p>
     <p class="slogan">The hundred are gathering.</p>
   </section>
+  <aside class="tally" id="tally" aria-live="polite" hidden>
+    <svg viewBox="0 0 46 46" aria-hidden="true" id="grid"></svg>
+    <div class="t"><span class="lab">GATHERED</span><span class="num" id="num"></span></div>
+  </aside>
 <script>
   const v = document.getElementById("film"), stage = document.getElementById("stage"), btn = document.getElementById("sound");
   // Browsers only autoplay muted video; the button restarts the film with its sound.
@@ -65,6 +86,28 @@
     btn.hidden = true;
   });
   v.addEventListener("ended", () => { stage.classList.add("ended"); btn.textContent = "Play again"; btn.hidden = false; });
+
+  // The hundred: one square per visitor in a 10 x 10 grid, the count in Roman numerals.
+  (() => {
+    const box = document.getElementById("tally"), grid = document.getElementById("grid"), num = document.getElementById("num");
+    const API = "https://abacus.jasoncameron.dev/", KEY = "centuria-sk/gathering";
+    const roman = n => { let r = ""; for (const [v, s] of [[1000,"M"],[900,"CM"],[500,"D"],[400,"CD"],[100,"C"],[90,"XC"],[50,"L"],[40,"XL"],[10,"X"],[9,"IX"],[5,"V"],[4,"IV"],[1,"I"]]) while (n >= v) { r += s; n -= v; } return r; };
+    let seen = false; try { seen = localStorage.getItem("centuria-gathered") === "1"; } catch (e) {}
+    fetch(API + (seen ? "get/" : "hit/") + KEY).then(r => r.ok ? r.json() : { value: 0 }).then(d => {
+      const n = Math.max(0, d.value | 0); if (!n) return;
+      try { localStorage.setItem("centuria-gathered", "1"); } catch (e) {}
+      const filled = n % 100 === 0 ? 100 : n % 100, legion = Math.floor((n - 1) / 100);
+      let out = "";
+      for (let i = 0; i < 100; i++) {
+        const x = (i % 10) * 4.6, y = Math.floor(i / 10) * 4.6;
+        out += '<rect x="' + x + '" y="' + y + '" width="3.4" height="3.4" class="' + (i < filled ? (i === filled - 1 && !seen ? "f new" : "f") : "") + '"/>';
+      }
+      grid.innerHTML = out;
+      num.innerHTML = roman(n) + " <small>/ " + roman(100 * (legion + 1)) + "</small>";
+      box.title = n + " of the hundred have gathered";
+      box.hidden = false; requestAnimationFrame(() => requestAnimationFrame(() => box.classList.add("on")));
+    }).catch(() => {});
+  })();
 </script>
 </body>
 </html>
