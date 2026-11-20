@@ -86,8 +86,13 @@
     };
     // Show the last known count at once; the free counter service can take seconds to answer.
     if (last) draw(last);
-    const ctl = new AbortController(); setTimeout(() => ctl.abort(), 12000);
-    fetch(API + (seen ? "get/" : "hit/") + KEY, { signal: ctl.signal }).then(r => r.ok ? r.json() : null).then(d => {
+    // The free service often stalls; try up to three times, 8 s each.
+    const ask = (tries) => {
+      const ctl = new AbortController(); setTimeout(() => ctl.abort(), 8000);
+      return fetch(API + (seen ? "get/" : "hit/") + KEY, { signal: ctl.signal }).then(r => r.ok ? r.json() : Promise.reject())
+        .catch(() => tries > 1 ? ask(tries - 1) : null);
+    };
+    ask(3).then(d => {
       const n = d ? Math.max(0, d.value | 0) : 0; if (!n) return;
       try { localStorage.setItem("centuria-gathered", "1"); localStorage.setItem("centuria-count", n); } catch (e) {}
       if (n !== last || !seen) draw(n);
