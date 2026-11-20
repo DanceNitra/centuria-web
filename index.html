@@ -38,20 +38,20 @@
     background: linear-gradient(180deg, var(--gold-hi), var(--gold) 55%, #a8741f);
     -webkit-background-clip: text; background-clip: text; color: transparent;
   }
-  .tally { position: fixed; right: 20px; bottom: 20px; z-index: 5; display: flex; align-items: center; gap: 12px;
-           padding: 10px 14px 10px 12px; border: 1px solid rgba(217, 164, 65, .28); border-radius: 4px;
+  .tally { position: fixed; right: clamp(16px, 1.6vw, 40px); bottom: clamp(16px, 1.6vw, 40px); z-index: 5; display: flex; align-items: center;
+           gap: clamp(12px, 1vw, 22px); padding: clamp(10px, .8vw, 18px) clamp(14px, 1.1vw, 24px); border: 1px solid rgba(217, 164, 65, .45); border-radius: 4px;
            background: rgba(0, 0, 0, .62); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
            opacity: 0; transform: translateY(6px); transition: opacity 1s ease, transform 1s ease; }
   .tally.on { opacity: 1; transform: none; }
-  .tally svg { display: block; width: 46px; height: 46px; }
-  .tally rect { fill: rgba(217, 164, 65, .2); }
+  .tally svg { display: block; width: clamp(52px, 3.6vw, 96px); height: clamp(52px, 3.6vw, 96px); }
+  .tally rect { fill: rgba(217, 164, 65, .24); }
   .tally rect.f { fill: var(--gold); }
   .tally rect.new { fill: var(--gold-hi); animation: pulse 1.6s ease-in-out 3; }
   @keyframes pulse { 50% { fill: #fff6dc; } }
-  .tally .t { display: flex; flex-direction: column; gap: 4px; line-height: 1; }
-  .tally .lab { font-size: 9px; letter-spacing: .38em; color: rgba(217, 164, 65, .7); }
-  .tally .num { font-weight: 600; font-size: 20px; letter-spacing: .08em; color: var(--gold-hi); }
-  .tally .num small { font-size: 12px; color: rgba(217, 164, 65, .6); letter-spacing: .12em; }
+  .tally .t { display: flex; flex-direction: column; gap: clamp(5px, .4vw, 10px); line-height: 1; }
+  .tally .lab { font-size: clamp(10px, .65vw, 15px); letter-spacing: .38em; color: rgba(217, 164, 65, .7); }
+  .tally .num { font-weight: 600; font-size: clamp(22px, 1.7vw, 40px); letter-spacing: .08em; color: var(--gold-hi); }
+  .tally .num small { font-size: .6em; color: rgba(217, 164, 65, .6); letter-spacing: .12em; }
   @media (max-width: 700px) { .tally { right: 12px; bottom: 12px; padding: 8px 10px; gap: 9px; }
     .tally svg { width: 36px; height: 36px; } .tally .num { font-size: 16px; } }
   @media (prefers-reduced-motion: reduce) { .tally, .tally rect.new { transition: none; animation: none; } }
